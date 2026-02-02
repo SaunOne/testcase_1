@@ -3,7 +3,7 @@ import 'package:testcase_1/core/shared/styles/tokens/index.dart';
 import 'package:testcase_1/core/shared/widgets/text/app_text.dart';
 import 'package:testcase_1/core/utils/extensions/context_theme_extension.dart';
 import 'package:testcase_1/features/tally_in/data/models/pallet_data_model.dart';
-import 'package:testcase_1/features/tally_in/presentations/tally_in/widgets/pallet_grid_cell.dart';
+import 'package:testcase_1/features/tally_in/presentations/tally_in/_widgets/pallet_grid_cell.dart';
 
 /// Grid widget for displaying cells in table format
 ///

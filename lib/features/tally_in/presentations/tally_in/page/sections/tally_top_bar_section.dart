@@ -1,24 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:testcase_1/core/shared/styles/tokens/index.dart';
 import 'package:testcase_1/core/shared/widgets/text/app_text.dart';
 import 'package:testcase_1/core/utils/extensions/context_theme_extension.dart';
+import 'package:testcase_1/features/tally_in/data/models/tally_models.dart';
 import 'package:testcase_1/features/tally_in/presentations/tally_in/_widgets/tally_status_chip.dart';
+import 'package:testcase_1/features/tally_in/presentations/tally_in/bloc/monitor/tally_monitor_bloc.dart';
 
-/// Data model for top bar information
-class TallyTopBarData {
-  const TallyTopBarData({
-    required this.asnNumber,
-    required this.companyName,
-    required this.vehicleNumber,
-    this.containerSeal,
-    this.isOffline = false,
-  });
+/// Connected widget - manages BlocSelector internally
+class TallyTopBarSectionConnected extends StatelessWidget {
+  const TallyTopBarSectionConnected({required this.data, super.key});
 
-  final String asnNumber;
-  final String companyName;
-  final String vehicleNumber;
-  final String? containerSeal;
-  final bool isOffline;
+  final TallyTopBarData data;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<TallyMonitorBloc, TallyMonitorState, bool>(
+      selector: (state) => state.isOffline,
+      builder: (context, isOffline) {
+        return TallyTopBarSection(
+          data: TallyTopBarData(
+            asnNumber: data.asnNumber,
+            companyName: data.companyName,
+            vehicleNumber: data.vehicleNumber,
+            containerSeal: data.containerSeal,
+            isOffline: isOffline,
+          ),
+          onOfflineModeToggle: () {
+            context.read<TallyMonitorBloc>().add(
+              TallyMonitorEvent.setOfflineMode(!isOffline),
+            );
+          },
+        );
+      },
+    );
+  }
 }
 
 /// Top bar section for Tally In page
@@ -36,6 +52,7 @@ class TallyTopBarSection extends StatelessWidget {
     this.onPhoto,
     this.onTallySheet,
     this.onContainerSealTap,
+    this.onOfflineModeToggle,
     super.key,
   });
 
@@ -46,6 +63,7 @@ class TallyTopBarSection extends StatelessWidget {
   final VoidCallback? onPhoto;
   final VoidCallback? onTallySheet;
   final VoidCallback? onContainerSealTap;
+  final VoidCallback? onOfflineModeToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +86,7 @@ class TallyTopBarSection extends StatelessWidget {
             // Right side: Action chips
             _ActionChips(
               isOffline: data.isOffline,
+              onOfflineModeToggle: onOfflineModeToggle,
               onViewRCS: onViewRCS,
               onBAPB: onBAPB,
               onPhoto: onPhoto,
@@ -122,24 +141,43 @@ class _AsnInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // ASN Number
-        AppText.title('ASN - ${data.asnNumber}', fontWeight: FontWeight.w600),
-        _Separator(),
-        // Company name
-        AppText.body(data.companyName, color: context.colors.textSecondary),
-        _Separator(),
-        // Vehicle number
-        AppText.body(data.vehicleNumber, color: context.colors.textSecondary),
-        _Separator(),
-        // Container/Seal dropdown
-        _ContainerSealDropdown(
-          value: data.containerSeal ?? 'No Cont / Seal',
-          onTap: onContainerSealTap,
-        ),
-      ],
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ASN Number
+          AppText.title(
+            fontSize: 16,
+            'ASN - ${data.asnNumber}',
+            fontWeight: FontWeight.w600,
+          ),
+          _Separator(),
+          // Company name
+          AppText.body(
+            fontSize: 12,
+            data.companyName,
+            color: context.colors.textSecondary,
+          ),
+          _Separator(),
+          // Vehicle number
+          AppText.body(
+            fontSize: 12,
+            data.vehicleNumber,
+            color: context.colors.textSecondary,
+          ),
+          _Separator(),
+          // Container/Seal dropdown
+          _ContainerSealDropdown(
+            value: data.containerSeal,
+            onTap: onContainerSealTap,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -149,7 +187,7 @@ class _Separator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: AppSpacing.horizontalMd,
+      padding: AppSpacing.horizontalXs,
       child: AppText.body('·', color: context.colors.textSecondary),
     );
   }
@@ -174,11 +212,11 @@ class _ContainerSealDropdown extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              AppText.body(value),
+              AppText.body(fontSize: 12, value),
               AppSpacing.widthXs,
               Icon(
                 Icons.keyboard_arrow_down,
-                size: 18,
+                size: 14,
                 color: context.colors.textSecondary,
               ),
             ],
@@ -193,6 +231,7 @@ class _ContainerSealDropdown extends StatelessWidget {
 class _ActionChips extends StatelessWidget {
   const _ActionChips({
     required this.isOffline,
+    this.onOfflineModeToggle,
     this.onViewRCS,
     this.onBAPB,
     this.onPhoto,
@@ -200,6 +239,7 @@ class _ActionChips extends StatelessWidget {
   });
 
   final bool isOffline;
+  final VoidCallback? onOfflineModeToggle;
   final VoidCallback? onViewRCS;
   final VoidCallback? onBAPB;
   final VoidCallback? onPhoto;
@@ -210,15 +250,16 @@ class _ActionChips extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Offline mode indicator
-        if (isOffline) ...[
-          TallyStatusChip(
-            label: 'Offline Mode',
-            variant: TallyChipVariant.warning,
-            icon: Icons.wifi_off,
-          ),
-          AppSpacing.widthSm,
-        ],
+        // Offline/Online mode indicator - always shown, tappable to toggle
+        TallyStatusChip(
+          label: isOffline ? 'Offline Mode' : 'Online Mode',
+          variant: isOffline
+              ? TallyChipVariant.warning
+              : TallyChipVariant.success,
+          icon: isOffline ? Icons.wifi_off : Icons.wifi,
+          onTap: onOfflineModeToggle,
+        ),
+        AppSpacing.widthSm,
         // View RCS
         TallyStatusChip(
           label: 'View RCS',

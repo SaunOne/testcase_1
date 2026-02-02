@@ -1,9 +1,121 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:testcase_1/core/shared/styles/tokens/index.dart';
 import 'package:testcase_1/core/shared/widgets/layout/app_card.dart';
 import 'package:testcase_1/core/shared/widgets/text/app_text.dart';
 import 'package:testcase_1/core/utils/extensions/context_theme_extension.dart';
+import 'package:testcase_1/features/tally_in/data/models/tally_models.dart';
 import 'package:testcase_1/features/tally_in/presentations/tally_in/_widgets/tally_action_button.dart';
+import 'package:testcase_1/features/tally_in/presentations/tally_in/bloc/input/tally_input_bloc.dart';
+import 'package:testcase_1/features/tally_in/presentations/tally_in/bloc/monitor/tally_monitor_bloc.dart';
+
+/// Connected widget - manages BlocBuilder internally
+class InputPanelSectionConnected extends StatelessWidget {
+  const InputPanelSectionConnected({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<TallyMonitorBloc, TallyMonitorState>(
+      buildWhen: (prev, curr) =>
+          prev.activeItem?.isFinished != curr.activeItem?.isFinished ||
+          prev.activePallet?.isComplete != curr.activePallet?.isComplete,
+      builder: (context, monitorState) {
+        // Check if input should be disabled
+        final isItemFinished = monitorState.activeItem?.isFinished ?? false;
+        final isPalletFull = monitorState.activePallet?.isComplete ?? false;
+        final isDisabled = isItemFinished || isPalletFull;
+
+        return BlocBuilder<TallyInputBloc, TallyInputState>(
+          buildWhen: (prev, curr) =>
+              prev.inputWeight != curr.inputWeight ||
+              prev.condition != curr.condition ||
+              prev.prodDate != curr.prodDate ||
+              prev.expDate != curr.expDate ||
+              prev.status != curr.status,
+          builder: (context, state) {
+            return InputPanelSection(
+              formData: DataInputFormData(
+                weight: state.inputWeight,
+                condition: state.condition,
+                prodDate: state.prodDate,
+                expDate: state.expDate,
+              ),
+              isDisabled: isDisabled,
+              disabledReason: isItemFinished
+                  ? 'Item is finished'
+                  : isPalletFull
+                  ? 'Pallet is full'
+                  : null,
+              onNumpadTap: isDisabled
+                  ? null
+                  : (key) {
+                      context.read<TallyInputBloc>().add(
+                        TallyInputEvent.numpadPressed(key),
+                      );
+                    },
+              onDeleteTap: isDisabled
+                  ? null
+                  : () {
+                      context.read<TallyInputBloc>().add(
+                        const TallyInputEvent.deleteLastChar(),
+                      );
+                    },
+              onClearTap: isDisabled
+                  ? null
+                  : () {
+                      context.read<TallyInputBloc>().add(
+                        const TallyInputEvent.clearInput(),
+                      );
+                    },
+              onConditionSelected: isDisabled
+                  ? null
+                  : (condition) {
+                      context.read<TallyInputBloc>().add(
+                        TallyInputEvent.setCondition(condition),
+                      );
+                    },
+              onProdDateTap: isDisabled
+                  ? null
+                  : () => _showDatePicker(context, isProduction: true),
+              onExpDateTap: isDisabled
+                  ? null
+                  : () => _showDatePicker(context, isProduction: false),
+              onAddItem: isDisabled
+                  ? null
+                  : () {
+                      context.read<TallyInputBloc>().add(
+                        const TallyInputEvent.submitInput(),
+                      );
+                    },
+              isLoading: state.status == InputStatus.validating,
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _showDatePicker(
+    BuildContext context, {
+    required bool isProduction,
+  }) async {
+    final now = DateTime.now();
+    final date = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: isProduction ? DateTime(2020) : now,
+      lastDate: isProduction ? now : DateTime(2030),
+    );
+
+    if (date != null && context.mounted) {
+      if (isProduction) {
+        context.read<TallyInputBloc>().add(TallyInputEvent.setProdDate(date));
+      } else {
+        context.read<TallyInputBloc>().add(TallyInputEvent.setExpDate(date));
+      }
+    }
+  }
+}
 
 /// Data model for data input form
 class DataInputFormData {
@@ -48,7 +160,7 @@ class InputPanelSection extends StatelessWidget {
     this.onDecimalSettingTap,
     this.onEditTap,
     this.onSaveTap,
-    this.onConditionTap,
+    this.onConditionSelected,
     this.onProdDateTap,
     this.onExpDateTap,
     this.onNumpadTap,
@@ -57,6 +169,9 @@ class InputPanelSection extends StatelessWidget {
     this.onClearTap,
     this.onAddItem,
     this.useFixedHeight = false,
+    this.isLoading = false,
+    this.isDisabled = false,
+    this.disabledReason,
     super.key,
   });
 
@@ -64,7 +179,7 @@ class InputPanelSection extends StatelessWidget {
   final VoidCallback? onDecimalSettingTap;
   final VoidCallback? onEditTap;
   final VoidCallback? onSaveTap;
-  final VoidCallback? onConditionTap;
+  final void Function(String)? onConditionSelected;
   final VoidCallback? onProdDateTap;
   final VoidCallback? onExpDateTap;
   final void Function(String value)? onNumpadTap;
@@ -76,6 +191,15 @@ class InputPanelSection extends StatelessWidget {
   /// When true, uses fixed height for numpad (for use in scrollable layouts)
   final bool useFixedHeight;
 
+  /// Loading state for submit button
+  final bool isLoading;
+
+  /// Whether input is disabled (item finished or pallet full)
+  final bool isDisabled;
+
+  /// Reason for disabled state
+  final String? disabledReason;
+
   /// Fixed height for numpad section when useFixedHeight is true
   static const double _numpadFixedHeight = 280;
 
@@ -83,47 +207,89 @@ class InputPanelSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppCard(
       padding: AppSpacing.paddingMd,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: useFixedHeight ? MainAxisSize.min : MainAxisSize.max,
-        children: [
-          // Header
-          _Header(
-            onDecimalSettingTap: onDecimalSettingTap,
-            onEditTap: onEditTap,
-            onSaveTap: onSaveTap,
-          ),
-          AppSpacing.heightMd,
+      child: Opacity(
+        opacity: isDisabled ? 0.6 : 1.0,
+        child: AbsorbPointer(
+          absorbing: isDisabled,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: useFixedHeight ? MainAxisSize.min : MainAxisSize.max,
+            children: [
+              // Disabled banner
+              if (isDisabled && disabledReason != null) ...[
+                Container(
+                  padding: AppSpacing.paddingSm,
+                  decoration: BoxDecoration(
+                    color: context.colors.warning.withOpacity(0.1),
+                    borderRadius: AppRadius.borderSm,
+                    border: Border.all(color: context.colors.warning),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        size: 16,
+                        color: context.colors.warning,
+                      ),
+                      AppSpacing.widthSm,
+                      AppText.caption(
+                        disabledReason!,
+                        color: context.colors.warning,
+                      ),
+                    ],
+                  ),
+                ),
+                AppSpacing.heightMd,
+              ],
 
-          // Form fields
-          _FormFields(
-            formData: formData,
-            onConditionTap: onConditionTap,
-            onProdDateTap: onProdDateTap,
-            onExpDateTap: onExpDateTap,
-          ),
-          AppSpacing.heightMd,
+              // Header
+              _Header(
+                onDecimalSettingTap: onDecimalSettingTap,
+                onEditTap: onEditTap,
+                onSaveTap: onSaveTap,
+              ),
+              AppSpacing.heightMd,
 
-          // Weight display and action buttons
-          _WeightRow(
-            weight: formData.weight,
-            onLockTap: onLockTap,
-            onDeleteTap: onDeleteTap,
-            onClearTap: onClearTap,
-          ),
-          AppSpacing.heightMd,
+              // Form fields
+              _FormFields(
+                formData: formData,
+                onConditionSelected: onConditionSelected,
+                onProdDateTap: onProdDateTap,
+                onExpDateTap: onExpDateTap,
+                isDisabled: isDisabled,
+              ),
+              AppSpacing.heightMd,
 
-          // Numpad - use fixed height when in scrollable context
-          if (useFixedHeight)
-            SizedBox(
-              height: _numpadFixedHeight,
-              child: _Numpad(onNumpadTap: onNumpadTap, onAddItem: onAddItem),
-            )
-          else
-            Expanded(
-              child: _Numpad(onNumpadTap: onNumpadTap, onAddItem: onAddItem),
-            ),
-        ],
+              // Weight display and action buttons
+              _WeightRow(
+                weight: formData.weight,
+                onLockTap: onLockTap,
+                onDeleteTap: onDeleteTap,
+                onClearTap: onClearTap,
+              ),
+              AppSpacing.heightMd,
+
+              // Numpad - use fixed height when in scrollable context
+              if (useFixedHeight)
+                SizedBox(
+                  height: _numpadFixedHeight,
+                  child: _Numpad(
+                    onNumpadTap: onNumpadTap,
+                    onAddItem: onAddItem,
+                    isDisabled: isDisabled,
+                  ),
+                )
+              else
+                Expanded(
+                  child: _Numpad(
+                    onNumpadTap: onNumpadTap,
+                    onAddItem: onAddItem,
+                    isDisabled: isDisabled,
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -204,15 +370,17 @@ class _IconButton extends StatelessWidget {
 class _FormFields extends StatelessWidget {
   const _FormFields({
     required this.formData,
-    this.onConditionTap,
+    this.onConditionSelected,
     this.onProdDateTap,
     this.onExpDateTap,
+    this.isDisabled = false,
   });
 
   final DataInputFormData formData;
-  final VoidCallback? onConditionTap;
+  final void Function(String)? onConditionSelected;
   final VoidCallback? onProdDateTap;
   final VoidCallback? onExpDateTap;
+  final bool isDisabled;
 
   @override
   Widget build(BuildContext context) {
@@ -227,7 +395,8 @@ class _FormFields extends StatelessWidget {
             child: _DropdownField(
               value: formData.condition,
               placeholder: 'Select',
-              onTap: onConditionTap,
+              items: TallyInputState.conditions,
+              onItemSelected: onConditionSelected,
             ),
           ),
         ),
@@ -295,45 +464,52 @@ class _FormField extends StatelessWidget {
   }
 }
 
-/// Dropdown field widget
+/// Dropdown field widget using PopupMenuButton for inline dropdown
 class _DropdownField extends StatelessWidget {
-  const _DropdownField({this.value, required this.placeholder, this.onTap});
+  const _DropdownField({
+    this.value,
+    required this.placeholder,
+    this.items = const [],
+    this.onItemSelected,
+  });
 
   final String? value;
   final String placeholder;
-  final VoidCallback? onTap;
+  final List<String> items;
+  final void Function(String)? onItemSelected;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: context.colors.surface,
-      borderRadius: AppRadius.borderSm,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: AppRadius.borderSm,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            border: Border.all(color: context.colors.border),
-            borderRadius: AppRadius.borderSm,
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: AppText.body(
-                  value ?? placeholder,
-                  color: value != null
-                      ? context.colors.textPrimary
-                      : context.colors.textDisabled,
-                ),
+    return PopupMenuButton<String>(
+      onSelected: onItemSelected,
+      offset: const Offset(0, 40),
+      shape: RoundedRectangleBorder(borderRadius: AppRadius.borderSm),
+      itemBuilder: (context) => items
+          .map((item) => PopupMenuItem<String>(value: item, child: Text(item)))
+          .toList(),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: context.colors.surface,
+          border: Border.all(color: context.colors.border),
+          borderRadius: AppRadius.borderSm,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: AppText.body(
+                value ?? placeholder,
+                color: value != null
+                    ? context.colors.textPrimary
+                    : context.colors.textDisabled,
               ),
-              Icon(
-                Icons.keyboard_arrow_down,
-                size: 18,
-                color: context.colors.textSecondary,
-              ),
-            ],
-          ),
+            ),
+            Icon(
+              Icons.keyboard_arrow_down,
+              size: 18,
+              color: context.colors.textSecondary,
+            ),
+          ],
         ),
       ),
     );
@@ -422,9 +598,26 @@ class _WeightRow extends StatelessWidget {
                   color: context.colors.textSecondary,
                 ),
                 const Spacer(),
-                AppText.h1(
-                  weight.isEmpty ? '0' : weight,
-                  fontWeight: FontWeight.w700,
+                // Animated weight display
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 150),
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0, 0.3),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: AppText.h1(
+                    weight.isEmpty ? '0' : weight,
+                    key: ValueKey(weight),
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             ),
@@ -492,9 +685,10 @@ class _ActionButton extends StatelessWidget {
 
 /// Numpad widget
 class _Numpad extends StatelessWidget {
-  const _Numpad({this.onNumpadTap, this.onAddItem});
+  const _Numpad({this.onNumpadTap, this.onAddItem, this.isDisabled = false});
 
   final void Function(String value)? onNumpadTap;
+  final bool isDisabled;
   final VoidCallback? onAddItem;
 
   @override

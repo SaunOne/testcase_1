@@ -1,21 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:testcase_1/core/shared/styles/tokens/index.dart';
 
-/// Main layout for Tally In page
-///
-/// Structure:
-/// ```
-/// ┌─────────────────────────────────────────────────┐
-/// │                   topBar                         │
-/// ├─────────────────────────────────────────────────┤
-/// │                palletMonitor                     │
-/// ├───────────────────────────┬─────────────────────┤
-/// │                           │                     │
-/// │       itemList            │     dataInput       │
-/// │       (flex: 6)           │     (flex: 4)       │
-/// │                           │                     │
-/// └───────────────────────────┴─────────────────────┘
-/// ```
 class TallyInLayout extends StatelessWidget {
   const TallyInLayout({
     super.key,

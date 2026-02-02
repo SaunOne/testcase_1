@@ -39,18 +39,14 @@ class TallySummaryBadge extends StatelessWidget {
       borderRadius: AppRadius.borderFull,
       child: InkWell(
         onTap: onTap,
-        borderRadius: AppRadius.borderFull,
+        borderRadius: AppRadius.borderCard,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (icon != null) ...[
-                Icon(
-                  icon,
-                  size: 16,
-                  color: AppPalette.white,
-                ),
+                Icon(icon, size: 16, color: AppPalette.white),
                 AppSpacing.widthSm,
               ],
               _buildValueText(),
@@ -72,14 +68,8 @@ class TallySummaryBadge extends StatelessWidget {
             color: AppPalette.white,
             fontWeight: FontWeight.w600,
           ),
-          AppText.caption(
-            ' / $totalValue ',
-            color: AppPalette.mediumGray,
-          ),
-          AppText.caption(
-            label,
-            color: AppPalette.white,
-          ),
+          AppText.caption(' / $totalValue ', color: AppPalette.mediumGray),
+          AppText.caption(label, color: AppPalette.white),
         ],
       );
     } else if (totalValue != null) {
@@ -93,18 +83,12 @@ class TallySummaryBadge extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
           AppSpacing.widthXs,
-          AppText.caption(
-            label,
-            color: AppPalette.white,
-          ),
+          AppText.caption(label, color: AppPalette.white),
         ],
       );
     }
 
     // Just show label
-    return AppText.caption(
-      label,
-      color: AppPalette.white,
-    );
+    return AppText.caption(label, color: AppPalette.white);
   }
 }
