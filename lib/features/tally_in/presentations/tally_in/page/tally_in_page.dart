@@ -104,10 +104,10 @@ class _TallyInView extends StatelessWidget {
         ),
       ],
       child: TallyInLayout(
-        topBar: TallyTopBarSectionConnected(data: topBarData),
-        palletMonitor: const PalletMonitorSectionConnected(),
-        itemList: const ListItemSectionConnected(),
-        inputPanel: const InputPanelSectionConnected(),
+        topBar: TallyTopBarSection(data: topBarData),
+        palletMonitor: const PalletMonitorSection(),
+        itemList: const ListItemSection(),
+        inputPanel: const InputPanelSection(),
       ),
     );
   }

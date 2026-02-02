@@ -55,4 +55,22 @@ class TallyMonitorState with _$TallyMonitorState {
 
   /// Get cells for display in grid (from active pallet)
   Map<String, TallyCell> get displayCells => activePallet?.cells ?? {};
+
+  /// Can navigate to previous pallet
+  bool get canNavigatePrevPallet {
+    final item = activeItem;
+    if (item == null || item.pallets.isEmpty) return false;
+    final palletIds = item.pallets.keys.toList();
+    final currentIndex = palletIds.indexOf(activePalletId ?? '');
+    return currentIndex > 0;
+  }
+
+  /// Can navigate to next pallet
+  bool get canNavigateNextPallet {
+    final item = activeItem;
+    if (item == null || item.pallets.isEmpty) return false;
+    final palletIds = item.pallets.keys.toList();
+    final currentIndex = palletIds.indexOf(activePalletId ?? '');
+    return currentIndex >= 0 && currentIndex < palletIds.length - 1;
+  }
 }
