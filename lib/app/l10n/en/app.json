@@ -1,0 +1,19 @@
+{
+    "common.app_name": "Flutter Starter Kit",
+    "shell.home": "Home",
+    "shell.explore": "Explore",
+    "shell.chat": "Chat",
+    "shell.profile": "Profile",
+    "shell.toggle_theme": "Toggle Theme",
+    "shell.toggle_language": "Toggle Language",
+    "shell.counter": "Counter",
+    "shell.increment": "Increment",
+    "common.retry": "Retry",
+    "common.cancel": "Cancel",
+    "common.save": "Save",
+    "common.delete": "Delete",
+    "common.edit": "Edit",
+    "common.loading": "Loading...",
+    "common.error": "Error",
+    "common.success": "Success"
+}

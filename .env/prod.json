@@ -1,0 +1,5 @@
+{
+    "ENV": "prod",
+    "BASE_URL": "example",
+    "API_KEY": "example"
+}

@@ -1,0 +1,6 @@
+{
+    "id": "home-001",
+    "title": "Welcome to Flutter Starter Kit",
+    "description": "This is a demo data loaded from local JSON file using Repository pattern with DTO, Entity, and Mapper.",
+    "count": 42
+}

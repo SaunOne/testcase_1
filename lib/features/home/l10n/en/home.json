@@ -1,0 +1,16 @@
+{
+    "home.title": "Home",
+    "home.subtitle": "Latest Posts",
+    "home.filter": "Filter",
+    "home.empty": "No posts found",
+    "home.error.load_failed": "Failed to load posts",
+    "home.filter.title": "Filter Posts",
+    "home.filter.all": "All Categories",
+    "home.filter.apply": "Apply Filter",
+    "home.filter.clear": "Clear",
+    "home.category.technology": "Technology",
+    "home.category.lifestyle": "Lifestyle",
+    "home.category.business": "Business",
+    "home.category.other": "Other",
+    "home.badge.recent": "New"
+}

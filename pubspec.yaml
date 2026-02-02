@@ -1,0 +1,105 @@
+name: testcase_1
+description: "Flutter Starter Kit - Production-ready modular Flutter template"
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  flutter_bloc: ^9.1.1
+  hydrated_bloc: ^10.1.1
+
+  # Routing
+  go_router: ^14.8.1
+
+  # Networking
+  dio: ^5.9.0
+
+  # Cache Storage
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  path_provider: ^2.1.5
+
+  # DI
+  get_it: ^8.0.3
+  injectable: ^2.5.0
+
+  # Models
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
+  # Storage
+  flutter_secure_storage: ^9.2.4
+  shared_preferences: ^2.5.3
+
+  # Localization
+  easy_localization: ^3.0.8
+
+  # Reactive Extensions
+  rxdart: ^0.28.0
+
+  # UI / Fonts
+  google_fonts: ^6.2.1
+
+  # Utilities
+  logger: ^2.5.0
+  intl: ^0.20.2
+  collection: ^1.19.1
+  equatable: ^2.0.7
+  cupertino_icons: ^1.0.8
+
+  # Social Login
+  google_sign_in: ^6.2.1
+  sign_in_with_apple: ^6.1.1
+  flutter_svg: ^2.2.3
+  cached_network_image: ^3.4.1
+
+  # Maps
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+
+  # WebSocket
+  web_socket_channel: ^3.0.1
+
+  # Location & Permissions
+  geolocator: ^13.0.1
+  permission_handler: ^11.3.1
+  battery_plus: ^6.0.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Lint
+  very_good_analysis: ^7.0.0
+
+  # Code Generation
+  build_runner: ^2.4.15
+  freezed: ^2.5.8
+  json_serializable: ^6.9.5
+  injectable_generator: ^2.7.0
+
+  # Testing
+  mocktail: ^1.0.4
+  bloc_test: ^10.0.0
+  flutter_launcher_icons: any
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/i18n/
+    - assets/dummy/
+    - assets/images/commons/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/logo_icon.png"
+  adaptive_icon_foreground: "assets/icons/logo_icon.png"
+  adaptive_icon_background: "#FFFFFF"

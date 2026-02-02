@@ -1,0 +1,19 @@
+{
+    "common.app_name": "Flutter Starter Kit",
+    "shell.home": "Beranda",
+    "shell.explore": "Jelajah",
+    "shell.chat": "Obrolan",
+    "shell.profile": "Profil",
+    "shell.toggle_theme": "Ganti Tema",
+    "shell.toggle_language": "Ganti Bahasa",
+    "shell.counter": "Penghitung",
+    "shell.increment": "Tambah",
+    "common.retry": "Coba Lagi",
+    "common.cancel": "Batal",
+    "common.save": "Simpan",
+    "common.delete": "Hapus",
+    "common.edit": "Ubah",
+    "common.loading": "Memuat...",
+    "common.error": "Kesalahan",
+    "common.success": "Berhasil"
+}
