@@ -3,8 +3,10 @@ import 'package:testcase_1/app/di/di.dart';
 import 'package:testcase_1/app/router/auth_notifier.dart';
 import 'package:testcase_1/app/router/feature_routes.dart';
 import 'package:testcase_1/core/storage/token_store.dart';
-import 'package:testcase_1/features/home/presentation/home/home_page.dart';
+import 'package:testcase_1/features/documentations/routes/documentation_routes.dart';
 import 'package:testcase_1/features/home/routes/home_routes.dart';
+import 'package:testcase_1/features/tally_in/presentations/tally_in/page/tally_in_page.dart';
+import 'package:testcase_1/features/tally_in/routes/tally_in_routes.dart';
 
 class AppRouter {
   AppRouter._();
@@ -20,7 +22,11 @@ class AppRouter {
   // Register all feature routes here
   // ═══════════════════════════════════════════════════════════════════════════
 
-  static final List<FeatureRoutes> _featureRoutes = [HomeRoutes()];
+  static final List<FeatureRoutes> _featureRoutes = [
+    HomeRoutes(),
+    TallyInRoutes(),
+    DoucmentationRoutes(),
+  ];
 
   // ═══════════════════════════════════════════════════════════════════════════
   // Collect routes from all features
@@ -42,7 +48,7 @@ class AppRouter {
   // ═══════════════════════════════════════════════════════════════════════════
 
   static final GoRouter router = GoRouter(
-    initialLocation: HomePage.routeName,
+    initialLocation: TallyInPage.routeName,
     refreshListenable: _authNotifier,
     routes: [
       // Standalone routes (no bottom nav)

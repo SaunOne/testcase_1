@@ -1,7 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:testcase_1/app/router/feature_routes.dart';
-import 'package:testcase_1/features/home/presentation/home/home_page.dart';
-import 'package:testcase_1/features/home/presentation/post_detail/page/post_detail_page.dart';
+import 'package:testcase_1/features/tally_in/presentations/tally_in/page/tally_in_page.dart';
 
 /// Home feature routes
 ///
@@ -9,7 +8,7 @@ import 'package:testcase_1/features/home/presentation/post_detail/page/post_deta
 /// - Home page (shell branch - bottom nav tab)
 /// - Post detail page (standalone, no shell)
 /// - Debug page (standalone, for component testing)
-class HomeRoutes extends FeatureRoutes {
+class TallyInRoutes extends FeatureRoutes {
   @override
   List<RouteBase> get routes => [];
 
@@ -17,8 +16,8 @@ class HomeRoutes extends FeatureRoutes {
   StatefulShellBranch? get shellBranch => StatefulShellBranch(
     routes: [
       GoRoute(
-        path: HomePage.routeName,
-        builder: (context, state) => const HomePage(),
+        path: TallyInPage.routeName,
+        builder: (context, state) => const TallyInPage(),
       ),
     ],
   );

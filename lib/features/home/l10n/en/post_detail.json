@@ -1,9 +1,0 @@
-{
-    "post_detail.title": "Post Detail",
-    "post_detail.error.load_failed": "Failed to load post",
-    "post_detail.error.not_found": "Post not found",
-    "post_detail.category.technology": "Technology",
-    "post_detail.category.lifestyle": "Lifestyle",
-    "post_detail.category.business": "Business",
-    "post_detail.category.other": "Other"
-}

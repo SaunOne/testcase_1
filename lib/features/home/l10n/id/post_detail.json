@@ -1,9 +1,0 @@
-{
-    "post_detail.title": "Detail Postingan",
-    "post_detail.error.load_failed": "Gagal memuat postingan",
-    "post_detail.error.not_found": "Postingan tidak ditemukan",
-    "post_detail.category.technology": "Teknologi",
-    "post_detail.category.lifestyle": "Gaya Hidup",
-    "post_detail.category.business": "Bisnis",
-    "post_detail.category.other": "Lainnya"
-}

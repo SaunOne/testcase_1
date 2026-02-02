@@ -1,5 +1,5 @@
 {
     "ENV": "dev",
-    "BASE_URL": "example",
+    "BASE_URL": "https://example.com",
     "API_KEY": "example"
 }
