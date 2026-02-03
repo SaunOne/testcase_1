@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:testcase_1/app/di/di.dart';
-import 'package:testcase_1/app/l10n/l10n_bundle_loader.dart';
 import 'package:testcase_1/app/router/app_router.dart';
 import 'package:testcase_1/app/theme/app_theme.dart';
 import 'package:testcase_1/app/theme/bloc/theme_cubit.dart';
@@ -20,12 +19,6 @@ class _AppState extends State<App> {
   @override
   void initState() {
     super.initState();
-    _loadCommonBundle();
-  }
-
-  Future<void> _loadCommonBundle() async {
-    await L10nBundleLoader().loadAppBundle('en');
-    await L10nBundleLoader().loadAppBundle('id');
   }
 
   @override
